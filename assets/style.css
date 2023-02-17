@@ -14,6 +14,7 @@ html, body {
   background-color: azure;
   padding: 16px;
   height: 100vh;
+  width: 25vw;
 }
 
 .start {
@@ -29,4 +30,23 @@ html, body {
 .menu {
   display: flex;
   justify-content: space-between;
+}
+
+.content{
+  display: flex;
+  flex-direction: column;
+  padding: 32px;
+  width: 75vw;
+  gap: 32px;
+}
+
+.header{
+  display: flex;
+  font-size: xx-large;
+  gap: 32px;
+  align-items: center;
+}
+
+img{
+  width: fit-content;
 }

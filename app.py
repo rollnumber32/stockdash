@@ -8,6 +8,7 @@ import yfinance as yf
 import pandas as pd
 import plotly.graph_objs as go
 import plotly.express as px
+from model import prediction
 
 app = dash.Dash(__name__)
 server = app.server
@@ -74,7 +75,7 @@ item1 = html.Div(
 item2 = html.Div(
     [
         html.Div(
-            [html.Img(id="logo"), html.P(id="ticker")],
+            [html.Img(id="logo"), html.Label(id="ticker")],
             className="header",
         ),
         html.Div(
@@ -121,22 +122,34 @@ app.layout = html.Div([item1, item2], className="container")
 )
 def update_data(n, val):
     if n == None:
-        return "Scrip code not found.", "Stonks", None, None, None
+        return (
+            "Scrip code not found.",
+            "https://picsum.photos/100/100.jpg",
+            "404",
+            None,
+            None,
+        )
 
     if val == None:
         raise PreventUpdate
     else:
         ticker = yf.Ticker(val)
         inf = ticker.info
-        df = pd.DataFrame().from_dict(inf, orient="index")
+        if inf == None:
+            return (
+                "Scrip code not found.",
+                "https://picsum.photos/100/100.jpg",
+                "404",
+                None,
+                None,
+            )
+        df = pd.DataFrame().from_dict(inf, orient="index").T
         df[["logo_url", "shortName", "longBusinessSummary"]]
 
-    print(df)
     return (
         df["longBusinessSummary"].values[0],
         df["logo_url"].values[0],
         df["shortName"].values[0],
-        None,
         None,
         None,
     )
@@ -191,6 +204,20 @@ def indicators(n, start_date, end_date, val):
 
     df.reset_index(inplace=True)
     fig = get_indicator_fig(df)
+    return [dcc.Graph(figure=fig)]
+
+
+@app.callback(
+    [Output("forecast-content", "children")],
+    [Input("forecast", "n_clicks")],
+    [State("n_days", "value"), State("dropdown_tickers", "value")],
+)
+def forecast(n, n_days, val):
+    if n == None:
+        return [""]
+    if val == None:
+        raise PreventUpdate
+    fig = prediction(val, int(n_days) + 1)
     return [dcc.Graph(figure=fig)]
 
 
